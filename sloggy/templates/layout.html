@@ -1,0 +1,124 @@
+{% load magic_params %}<!DOCTYPE html>
+<html>
+<head>
+    <title>loggy</title>
+    <meta charset="UTF-8"/>
+    <link href='http://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/normalize.min.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/h5bp.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/highlight_js_theme.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/style.css"/>
+
+    <script class="include" type="text/javascript" src="/js/jquery.min.js"></script>
+    <script class="include" type="text/javascript" src="/js/highlight.pack.js"></script>
+    <script class="include" type="text/javascript" src="/js/raphael-min.js"></script>
+    <script class="include" type="text/javascript" src="/js/g.raphael-min.js"></script>
+    <script class="include" type="text/javascript" src="/js/g.bar-min.js"></script>
+    <script class="include" type="text/javascript" src="/js/g.line-min.js"></script>
+
+    <script type="text/javascript">
+        function enumerate(block, start, highlight) {
+            line = start;
+            block.html("<span class='stacktrace_level__line'>" + line + "</span>&nbsp;" + block.html());
+            block.html(block.html().replace(/<br>/gi, function() {
+                line++;
+                if (line == highlight) {
+                    return "<br><span class='stacktrace_level__line_hlght_ok'>" + line + "</span>&nbsp;"
+                } else {
+                    return "<br><span class='stacktrace_level__line'>" + line + "</span>&nbsp;"
+                }
+            }));
+        }
+    </script>
+
+    {% block js %}
+    {% endblock %}
+</head>
+<body>
+
+<div class="header">
+    <div class="container">
+        <a href="/" class="header__logo">loggy</a>
+        {% block breadcrumbs %}
+        {% endblock %}
+        <a href="/" class="header__link {% if request.META.PATH_INFO == "/" %}header__link_active_true{% endif %}">Группы</a>
+        <a href="/list/" class="header__link {% if request.META.PATH_INFO == "/list/" %}header__link_active_true{% endif %}">Список</a>
+    </div>
+</div>
+
+<div class="container">
+    {% block top %}
+    {% endblock %}
+    <div class="body">
+        {% block body %}
+        {% endblock %}
+    </div>
+    <div class="sidebar">
+        {% block sidebar %}
+            <div class="block_overlay">
+                <div class="selection_menu">
+                    <a href="{% magic_params request.GET "project" "" "/" %}"
+                       class="selection_menu__item {% if not request.GET.project %}selection_menu__item_type_selected{% endif %}">
+                        Все проекты
+                    </a>
+                    {% for project in event_projects %}
+                        <a href="{% magic_params request.GET "project" project.name "/" %}"
+                           class="selection_menu__item {% if request.GET.project == project.name %}selection_menu__item_type_selected{% endif %}">
+                            {{ project.name }} ({{ project.groups_count }}|{{ project.logs_count }})
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="block_overlay">
+                <div class="selection_menu">
+                    <a href="{% magic_params request.GET "level" "" "/" %}"
+                       class="selection_menu__item {% if not request.GET.level %}selection_menu__item_type_selected{% endif %}">
+                        Все уровни
+                    </a>
+                    {% for level in event_levels %}
+                        <a href="{% magic_params request.GET "level" level.group__level "/" %}"
+                           class="selection_menu__item {% if request.GET.level == level.group__level %}selection_menu__item_type_selected{% endif %}">
+                            <span class="level_preview_dot group_details__counter_level_{{ level.group__level }}"></span> {{ level.group__level }} ({{ level.count }})
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="block_overlay">
+                <div class="selection_menu">
+                    <a href="{% magic_params request.GET "type" "" "/" %}"
+                       class="selection_menu__item {% if not request.GET.type %}selection_menu__item_type_selected{% endif %}">
+                        Все типы
+                    </a>
+                    {% for type in event_types %}
+                        <a href="{% magic_params request.GET "type" type.group__type "/" %}"
+                           class="selection_menu__item {% if request.GET.type == type.group__type %}selection_menu__item_type_selected{% endif %}">
+                            <span class="level_preview_borders group_details__counter_type_{{ type.group__type }}"></span> {{ type.group__type }} ({{ type.count }})
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="block_overlay">
+                <div class="selection_menu">
+                    <a href="{% magic_params request.GET "module" "" "/" %}"
+                       class="selection_menu__item {% if not request.GET.module %}selection_menu__item_type_selected{% endif %}">
+                        Все модули
+                    </a>
+                    {% for module in event_modules %}
+                        <a href="{% magic_params request.GET "module" module.group__module "/" %}"
+                           class="selection_menu__item {% if request.GET.module == module.group__module %}selection_menu__item_type_selected{% endif %}">
+                            {{ module.group__module|default:"Unknown module"|truncatechars:20 }} ({{ module.count }})
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endblock %}
+    </div>
+    <div class="footer">
+         version {{ settings.VERSION }} :: developed by <a href="http://vas3k.ru">vas3k</a>
+    </div>
+</div>
+</body>
+</html>

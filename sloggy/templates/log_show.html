@@ -1,0 +1,155 @@
+{% extends "layout.html" %}
+{% load text_filters %}
+{% load json_filters %}
+{% block js %}
+    <script type="text/javascript">
+        $(function() {
+            $(".stacktrace_level__locals").click(function() {
+                $(this).find(".param_table").toggle();
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <span class="breadcrumbs__splitter">::</span>
+        <a href="/group/{{ log.group_id }}/" class="breadcrumbs__item">{{ log.group.exc_name|default:"unknown"|truncatechars:90 }}</a>
+        <span class="breadcrumbs__splitter">::</span>
+        <span class="breadcrumbs__item">#{{ log.id }}</span>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="log_details">
+        <div class="log_details__counter group_details__counter_level_{{ log.group.level }} group_details__counter_type_{{ log.group.type }}"></div>
+        <div class="log_details__header">{{ log.group.exc_name }}{% if log.group.exc_value %}: {{ log.group.exc_value }}{% endif %}</div>
+        <div class="custom_tags">
+            <a href="/?level={{ log.group.level }}" class="custom_tags__item">{{ log.group.get_level_display }}</a>
+            <a href="/?type={{ log.group.type }}" class="custom_tags__item">{{ log.group.get_type_display }}</a>
+        </div>
+        {% if log.group.project %}<div class="log_details__subheader">Проект: {{ log.group.project.name }}</div>{% endif %}
+        {% if log.group.module %}<div class="log_details__subheader">Модуль: {{ log.group.module }}</div>{% endif %}
+        {% if log.filename %}<div class="log_details__subheader">Файл: {{ log.group.filename }}</div>{% endif %}
+        <div class="log_details__subheader">Было {{ log.created_at|relative_date }} ({{ log.created_at|date:"d.m.Y H:i" }})</div>
+    </div>
+
+    <div class="log_big">
+        <div class="tabs">
+            <div class="tabs__tab tabs__tab_type_active" data-activate="tab1">Stacktrace</div>
+            <div class="tabs__tab" data-activate="tab2">Request</div>
+            <div class="tabs__tab" data-activate="tab3">Content</div>
+        </div>
+
+        <div class="log_content" id="tab4">
+            {% if log.content %}
+                <div class="log_header">Content</div>
+                <pre class="contentdata">{{ log.content }}</pre>
+            {% endif %}
+        </div>
+
+        <div class="log_stacktrace" id="tab1">
+            {% if log_traceback %}
+                <div class="log_header">Traceback</div>
+                <div class="stacktrace">
+                    {% for frame in log_traceback %}
+                        <div class="stacktrace_level">
+                            <div class="stacktrace_level__file">
+                                <strong>{{ frame.filename }}</strong> in <strong>{{ frame.method }}</strong> (строка: {{ frame.line }})
+                            </div>
+
+                            <div class="stacktrace_level__expression">
+                                <pre><code id="code{{ frame.id }}">{{ frame.code|safe|nl2br2 }}</code></pre>
+                            </div>
+                            <script type="text/javascript">
+                                hljs.highlightBlock($("#code{{ frame.id }}").get(0), null, true);
+                                enumerate($("#code{{ frame.id }}"), Math.max(0, {{ frame.line }} - 6), {{ frame.line }});
+                            </script>
+
+                            {% if frame.local_variables %}
+                                <div class="stacktrace_level__locals">
+                                    Locals &rarr;
+                                    <div class="param_table param_table_type_backtrace">
+                                        {% for key, value in frame.local_variables|json_dict_items %}
+                                            <div class="param_table_key">{{ key }}</div>
+                                            <div class="param_table_value param_table_value_type_backtrace">{{ value }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="log_request" id="tab3">
+            {% if log_request %}
+                <div class="log_header">Request</div>
+                <div class="request">
+                    <div class="request_level">
+                        <div class="param_table">
+                            {% if log_request.url %}
+                                <div class="param_table_key">URL:</div>
+                                <div class="param_table_value">{{ log_request.url }}</div>
+                            {% endif %}
+
+                            <div class="clearfix"></div>
+
+                            {% if log_request.host %}
+                                <div class="param_table_key">Host:</div>
+                                <div class="param_table_value">{{ log_request.host }}</div>
+                            {% endif %}
+
+                            <div class="clearfix"></div>
+
+                            {% if log_request.method %}
+                                <div class="param_table_key">Method:</div>
+                                <div class="param_table_value">{{ log_request.method }}</div>
+                            {% endif %}
+
+                            <div class="clearfix"></div>
+
+                            {% if log_request.params %}
+                                <div class="param_table_key">GET/POST:</div>
+                                <div class="param_table_value">
+                                    {% for key, value in log_request.params|json_dict_items %}
+                                        <div class="param_table_key param_table_key_type_sub">{{ key }}</div>
+                                        <div class="param_table_value param_table_value_type_sub">{{ value }}</div>
+                                        <div class="clearfix"></div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="clearfix"></div>
+
+                            {% if log_request.cookies %}
+                                <div class="param_table_key">COOKIES:</div>
+                                <div class="param_table_value">
+                                    {% for key, value in log_request.cookies|json_dict_items %}
+                                        <div class="param_table_key param_table_key_type_sub">{{ key }}</div>
+                                        <div class="param_table_value param_table_value_type_sub">{{ value }}</div>
+                                        <div class="clearfix"></div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="clearfix"></div>
+
+                            {% if log_request.meta %}
+                                <div class="param_table_key">META:</div>
+                                <div class="param_table_value">
+                                    {% for key, value in log_request.meta|json_dict_items %}
+                                        <div class="param_table_key param_table_key_type_sub">{{ key }}</div>
+                                        <div class="param_table_value param_table_value_type_sub">{{ value }}</div>
+                                        <div class="clearfix"></div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

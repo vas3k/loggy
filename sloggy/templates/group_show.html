@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+{% load text_filters %}
+{% block js %}
+    <script type="text/javascript">
+        $(function() {
+            var data_labels = [{% for k, v in events_graph %}"{{ k }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+            var data_y = [{% for k, v in events_graph %}{{ v }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+            var data_x = [];
+            for (var i = 0; i < data_y.length; i++) {
+                data_x.push(i);
+            }
+            var r = Raphael("events_graph");
+            var lines = r.linechart(
+                    0, 0, 680, 90,
+                    data_x,
+                    data_y,
+                    {
+                        axis: "0 0 0 0",
+                        symbol: "circle",
+                        smooth: false,
+                        axisxstep: 10,
+                        colors: [ "#6a6a6a" ]
+                    }
+            ).hoverColumn(function () {
+                        this.flag = r.popup(this.x, this.y, this.values || "0", "left").insertBefore(this);
+                    }, function () {
+                        this.flag.animate({opacity: 0}, 300, function () {this.remove();});
+                    });
+        });
+    </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <span class="breadcrumbs__splitter">::</span>
+        <span class="breadcrumbs__item">{{ group.exc_name|default:"unknown"|truncatechars:90 }}</span>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="group_info">
+        <div class="group_show">
+            <div class="group_show__counter group_details__counter_level_{{ group.level }} group_details__counter_type_{{ group.type }}">{{ group.logs_count }}</div>
+            <div class="group_show__header">{{ group.exc_name }}{% if group.exc_value %}: {{ group.exc_value }}{% endif %}</div>
+            <div class="custom_tags custom_tags_type_show">
+                <a href="/?level={{ group.level }}" class="custom_tags__item">{{ group.get_level_display }}</a>
+                <a href="/?type={{ group.type }}" class="custom_tags__item">{{ group.get_type_display }}</a>
+            </div>
+            {% if group.project %}<div class="group_show__subheader">Проект: <a href="/?project={{ group.project.name }}">{{ group.project.name }}</a></div>{% endif %}
+            {% if group.module %}<div class="group_show__subheader">Модуль: <a href="/?module={{ group.module }}">{{ group.module }}</a></div>{% endif %}
+            {% if group.filename %}<div class="group_show__subheader">Файл: {{ group.filename }}</div>{% endif %}
+            <div class="group_show__subheader">Первое появление: {{ group.created_at|relative_date }} ({{ group.created_at|date:"d.m.Y H:i" }})</div>
+            <div class="group_show__subheader">Последнее появление: {{ group.updated_at|relative_date }} ({{ group.updated_at|date:"d.m.Y H:i" }})</div>
+        </div>
+
+        <div class="group_graph" id="group_graph">
+            <div class="events_graph" id="events_graph"></div>
+            <div class="events_graph_x">
+                {% for k, v in events_graph %}
+                    {% if forloop.counter0|divisibleby:"5" %}
+                        <span class="events_graph_x__block">{{ k|safe }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="group_logs">
+            {% for log in logs %}
+                <a href="/log/{{ log.id }}/" class="small_log_details">
+                    <div class="small_log_details__time">
+                        {{ log.created_at|date:"H:i" }}<br>
+                        <small>{{ log.created_at|date:"d.m.Y" }}</small>
+                    </div>
+                    <div class="small_log_details__header">
+                        ({{ log.group.type }} #{{ log.id }})
+                        {% if log.server %}server <b>{{ log.server }}</b>, {% endif %}
+                        {% if log.group.module %}module <b>{{ log.group.module }}</b>{% endif %}
+                    </div>
+                    <div class="small_log_details__subheader">{{ log.group.filename }}</div>
+                </a>
+            {% endfor %}
+        </div>
+
+    </div>
+{% endblock %}

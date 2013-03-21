@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% load text_filters %}
+{% block js %}
+    {% include "blocks/main_graph.html" %}
+{% endblock %}
+
+{% block top %}
+    <div class="top_graph" id="plot"></div>
+    <div class="top_graph_x">
+        {% for k, v in top_graph %}
+            {% if forloop.counter0|divisibleby:"5" %}
+                <span class="top_graph_x__block">{{ k|safe }}</span>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="error_list">
+        {% for group in groups %}
+            <div class="group_details">
+                <div class="group_details__counter group_details__counter_level_{{ group.level }} group_details__counter_type_{{ group.type }}">{{ group.logs_count }}</div>
+                <a href="/group/{{ group.id }}/" class="group_details__header">{{ group.exc_name }}{% if group.exc_value %}: {{ group.exc_value }}{% endif %}</a>
+
+                {% if group.created_at == group.updated_at %}
+                    <div class="group_details__time">Первый раз <strong>{{ group.created_at|relative_date }}</strong></div>
+                {% else %}
+                    <div class="group_details__time">Первый раз <strong>{{ group.created_at|relative_date }}</strong>, последний &mdash; <strong>{{ group.updated_at|relative_date }}</strong></div>
+                {% endif %}
+
+                {% if group.filename %}<div class="group_details__subheader">Файл: {{ group.filename }}</div>{% endif %}
+                {% if group.module %}<div class="group_details__subheader">Модуль: <a href="/?module={{ group.module }}">{{ group.module }}</a></div>{% endif %}
+                {% if group.project %}<div class="group_details__subheader">Проект: <a href="/?project={{ group.project.name }}">{{ group.project.name }}</a></div>{% endif %}
+
+                <div class="custom_tags custom_tags_type_group">
+                    <a href="/?level={{ group.level }}" class="custom_tags__item">{{ group.get_level_display }}</a>
+                    <a href="/?type={{ group.type }}" class="custom_tags__item">{{ group.get_type_display }}</a>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% if groups.paginator.num_pages > 1 %}
+            <div class="paginator">
+                {% if groups.has_previous %}
+                    <a href="?page={{ groups.previous_page_number }}" class="paginator__arrow paginator__arrow_direction_left">&larr;</a>
+                {% endif %}
+
+                {% if groups.has_next %}
+                    <a href="?page={{ groups.next_page_number }}" class="paginator__arrow paginator__arrow_direction_right">&rarr;</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

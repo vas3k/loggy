@@ -1,0 +1,104 @@
+{% extends "layout.html" %}
+{% load text_filters %}
+{% load magic_params %}
+{% block js %}
+    {% include "blocks/main_graph.html" %}
+{% endblock %}
+
+{% block top %}
+    <div class="top_graph" id="plot"></div>
+{% endblock %}
+
+{% block body %}
+    <div class="log_list">
+        {% for log in logs %}
+            <a href="/log/{{ log.id }}/" class="log_list_item">
+                <div class="log_list_item__dot group_details__counter_level_{{ log.group.level }} group_details__counter_type_{{ log.type }}"></div>
+                <div class="log_list_item__header">
+                    #{{ log.id }}
+                    {{ log.group.type }}
+                    <b>{{ log.group.exc_name }}</b>
+                    {% if log.group.module %}in module <b>{{ log.group.module }}</b>{% endif %}
+                </div>
+                <div class="log_list_item__time">{{ log.created_at|relative_date }}</div>
+            </a>
+            {% if not loop.last %}
+                <div class="list_splitter"></div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if logs.paginator.num_pages > 1 %}
+        <div class="paginator">
+            {% if logs.has_previous %}
+                <a href="?page={{ logs.previous_page_number }}" class="paginator__arrow paginator__arrow_direction_left">&larr;</a>
+            {% endif %}
+
+            {% if logs.has_next %}
+                <a href="?page={{ logs.next_page_number }}" class="paginator__arrow paginator__arrow_direction_right">&rarr;</a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block sidebar %}
+    <div class="block_overlay">
+        <div class="selection_menu">
+            <a href="{% magic_params request.GET "project" "" "/list/" %}"
+               class="selection_menu__item {% if not request.GET.project %}selection_menu__item_type_selected{% endif %}">
+                Все проекты
+            </a>
+            {% for project in event_projects %}
+                <a href="{% magic_params request.GET "project" project.name "/list/" %}"
+                   class="selection_menu__item {% if request.GET.project == project.name %}selection_menu__item_type_selected{% endif %}">
+                    {{ project.name }} ({{ project.groups_count }}|{{ project.logs_count }})
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="block_overlay">
+        <div class="selection_menu">
+            <a href="{% magic_params request.GET "level" "" "/list/" %}"
+               class="selection_menu__item {% if not request.GET.level %}selection_menu__item_type_selected{% endif %}">
+                Все уровни
+            </a>
+            {% for level in event_levels %}
+                <a href="{% magic_params request.GET "level" level.group__level "/list/" %}"
+                   class="selection_menu__item {% if request.GET.level == level.group__level %}selection_menu__item_type_selected{% endif %}">
+                    <span class="level_preview_dot group_details__counter_level_{{ level.group__level }}"></span> {{ level.group__level }} ({{ level.count }})
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="block_overlay">
+        <div class="selection_menu">
+            <a href="{% magic_params request.GET "type" "" "/list/" %}"
+               class="selection_menu__item {% if not request.GET.type %}selection_menu__item_type_selected{% endif %}">
+                Все типы
+            </a>
+            {% for type in event_types %}
+                <a href="{% magic_params request.GET "type" type.group__type "/list/" %}"
+                   class="selection_menu__item {% if request.GET.type == type.group__type %}selection_menu__item_type_selected{% endif %}">
+                    <span class="level_preview_borders group_details__counter_type_{{ type.group__type }}"></span> {{ type.group__type }} ({{ type.count }})
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="block_overlay">
+        <div class="selection_menu">
+            <a href="{% magic_params request.GET "module" "" "/list/" %}"
+               class="selection_menu__item {% if not request.GET.module %}selection_menu__item_type_selected{% endif %}">
+                Все модули
+            </a>
+            {% for module in event_modules %}
+                <a href="{% magic_params request.GET "module" module.group__module "/list/" %}"
+                   class="selection_menu__item {% if request.GET.module == module.group__module %}selection_menu__item_type_selected{% endif %}">
+                    {{ module.group__module|default:"Unknown module"|truncatechars:20 }} ({{ module.count }})
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

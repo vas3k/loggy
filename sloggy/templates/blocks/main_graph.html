@@ -1,0 +1,27 @@
+<script type="text/javascript">
+    $(function() {
+        var data_labels = [{% for k, v in top_graph %}"{{ k }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+        var data_y = [{% for k, v in top_graph %}{{ v }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+        var data_x = [];
+        for (var i = 0; i < data_y.length; i++) {
+            data_x.push(i);
+        }
+        var r = Raphael("plot");
+        var lines = r.linechart(
+            0, 0, 900, 90,
+            data_x,
+            data_y,
+            {
+                axis: "0 0 0 0",
+                symbol: "circle",
+                smooth: false,
+                axisxstep: 10,
+                colors: [ "#6a6a6a" ]
+            }
+        ).hoverColumn(function () {
+            this.flag = r.popup(this.x, this.y, this.values || "0", "left").insertBefore(this);
+        }, function () {
+            this.flag.animate({opacity: 0}, 300, function () {this.remove();});
+        });
+    });
+</script>

@@ -1,0 +1,5 @@
+.idea
+.DS_Store
+*.pyc
+sloggy/sloggy/local_settings.py
+

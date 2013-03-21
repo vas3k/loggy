@@ -1,0 +1,6 @@
+Loggy is an exception tracker for your python projects, developed like alternative to django internal email reporting system.
+
+sloggy — loggy server. Simple django application.
+cloggy — loggy client. Uses SQLAlchemy to send reports directly to the database.
+
+Examples, screenshots and full description: http://vas3k.ru/dev/loggy/ 
