@@ -17,7 +17,7 @@ class WerkzeugClient(PythonClient):
             return {}
 
         result = {
-            "url": request.full_path,
+            "url": getattr(request, "full_path", request.path + ("?" + request.query_string if request.query_string else "")),
             "host": request.host,
             "method": request.method,
             "params": self._safe_jsonify_dict(request.args or request.form),
