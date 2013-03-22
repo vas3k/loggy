@@ -4,13 +4,20 @@ from python_client import PythonClient, PythonLoggingHandler
 
 
 class WerkzeugClient(PythonClient):
+    def __init__(self, request_provider=None, *args, **kwargs):
+        self.request_provider = request_provider
+        super(WerkzeugClient, self).__init__(*args, **kwargs)
+
     def format_request(self, data):
         request = data.get("request")
+        if not request:
+            if self.request_provider:
+                request = self.request_provider()
         if not request:
             return {}
 
         result = {
-            "url": request.full_path,
+            "url": getattr(request, "full_path", request.path + ("?" + request.query_string if request.query_string else "")),
             "host": request.host,
             "method": request.method,
             "params": self._safe_jsonify_dict(request.args or request.form),
@@ -22,9 +29,9 @@ class WerkzeugClient(PythonClient):
 
 
 class WerkzeugLoggingHandler(PythonLoggingHandler):
-    def __init__(self, level=logging.NOTSET):
+    def __init__(self, level=logging.NOTSET, request_provider=None):
         PythonLoggingHandler.__init__(self, level)
-        self.client_class = WerkzeugClient
+        self.client_class = lambda *args, **kwargs: WerkzeugClient(request_provider=request_provider, *args, **kwargs)
 
 
 def loggify(project=None):
