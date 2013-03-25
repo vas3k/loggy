@@ -11,6 +11,10 @@ a {
     text-decoration: none;
 }
 
+pre {
+    word-wrap: normal;
+}
+
 .container {
     width: 960px;
     min-height: 40px;
@@ -502,13 +506,12 @@ a {
         background-color: #EEE;
         padding: 5px 10px;
         margin-top: 5px;
-        margin-bottom: 30px;
         overflow: hidden;
         text-shadow: none !important;
     }
 
         .stacktrace_level__expression code {
-            padding-left: 15px;
+            padding-left: 10px;
             font-size: 12px;
             font-family: Menlo, Consolas, monospace;
             overflow: hidden;

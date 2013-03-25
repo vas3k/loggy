@@ -6,22 +6,6 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import get_object_or_404
 from libs.utils import render_to
 from models import *
-import sys
-
-
-def tets(request):
-    sys.path.append("/Users/vas3k/Dev/Startup/Loggy/")
-    from cloggy.django_client import DjangoClient
-    l = DjangoClient(project="vas3k.ru")
-    # l.send_message("Spam detected", """
-    #     Пользователь с IP 192.168.1.2 оставил комментарий, помеченный системой как спам:
-    #
-    #     ПОКУПАЙ ВИАГРА ДОРОГОЙ СЛУШАЙ БЕЗ СМС ОТДАМ БЕСПЛАТНО!
-    # """, level=LOG_LEVEL_INFO)
-    # try:
-    #     int("werehuman")
-    # except:
-    #     l.catch_exception(request=request, level=LOG_LEVEL_WARNING)
 
 
 def __format_graph(queryset, start_from):
@@ -64,12 +48,14 @@ def group_details(request, group_id):
         "request": request,
         "logs": logs,
         "group": group,
-        "events_graph": __format_graph(Event.request_filter(request), events_graph_start_date)
+        "events_graph": __format_graph(
+            Event.request_filter(request).filter(group_id=group_id),
+            events_graph_start_date
+        )
     }
 
 @render_to("log_list.html")
 def log_list(request):
-    # tets(request)
     paginator = Paginator(Event.request_filter(request).order_by("-created_at"), settings.LOGS_PER_PAGE)
     page = request.GET.get("page", 1)
     try:

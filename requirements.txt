@@ -1,2 +1,2 @@
-django
-sqlalchemy
+django>=1.4
+sqlalchemy>=0.7.5

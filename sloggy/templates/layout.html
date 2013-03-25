@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="/css/normalize.min.css"/>
     <link rel="stylesheet" type="text/css" media="screen" href="/css/h5bp.css"/>
     <link rel="stylesheet" type="text/css" media="screen" href="/css/highlight_js_theme.css"/>
-    <link rel="stylesheet" type="text/css" media="screen" href="/css/style.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/style.css?v=2"/>
 
     <script class="include" type="text/javascript" src="/js/jquery.min.js"></script>
     <script class="include" type="text/javascript" src="/js/highlight.pack.js"></script>
@@ -17,15 +17,21 @@
     <script class="include" type="text/javascript" src="/js/g.line-min.js"></script>
 
     <script type="text/javascript">
+        function pad(text, num) {
+            text = "" + text;
+            text = text + Array(num + 1 - text.length).join("&nbsp;");
+            return text;
+        }
+
         function enumerate(block, start, highlight) {
             line = start;
-            block.html("<span class='stacktrace_level__line'>" + line + "</span>&nbsp;" + block.html());
+            block.html("<span class='stacktrace_level__line'>" + pad(line, 4) + "</span>&nbsp;" + block.html());
             block.html(block.html().replace(/<br>/gi, function() {
                 line++;
                 if (line == highlight) {
-                    return "<br><span class='stacktrace_level__line_hlght_ok'>" + line + "</span>&nbsp;"
+                    return "<br><span class='stacktrace_level__line_hlght_ok'>" + pad(line, 4) + "</span>&nbsp;"
                 } else {
-                    return "<br><span class='stacktrace_level__line'>" + line + "</span>&nbsp;"
+                    return "<br><span class='stacktrace_level__line'>" + pad(line, 4) + "</span>&nbsp;"
                 }
             }));
         }

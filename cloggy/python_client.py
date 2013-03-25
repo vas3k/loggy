@@ -20,21 +20,13 @@ class PythonClient(object):
             Для работы требует переданного объекта-traceback, который может быть получен
             как третий возвращаемый аргумент вызова sys.exc_info()
         """
-        while 1:
-            if not exc_traceback.tb_next:
-                break
-            exc_traceback = exc_traceback.tb_next
-
         stack = []
-        frame = exc_traceback.tb_frame
-        while frame:
-            stack.append(frame)
-            frame = frame.f_back
-        stack.reverse()
+        while exc_traceback:
+            stack.append(exc_traceback.tb_frame)
+            exc_traceback = exc_traceback.tb_next
 
         backtrace = []
         for frame in stack:
-            # кадр стека
             formatted_frame = {
                 "function": frame.f_code.co_name,
                 "filename": frame.f_code.co_filename,
@@ -43,7 +35,7 @@ class PythonClient(object):
                 "locals": {}
             }
 
-            # вытащим код
+            # вытащим код из файла
             try:
                 start_line = max(0, frame.f_lineno - 7)
                 end_line = start_line + 10
