@@ -3,7 +3,7 @@ from collections import defaultdict
 import datetime
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from libs.utils import render_to
 from models import *
 
@@ -53,6 +53,50 @@ def group_details(request, group_id):
             events_graph_start_date
         )
     }
+
+
+def group_star(request, group_id):
+    group = get_object_or_404(Group, pk=group_id)
+    group.is_favorited = not group.is_favorited
+    group.save()
+    return redirect("/")
+
+
+def group_resolve(request, group_id):
+    group = get_object_or_404(Group, pk=group_id)
+    group.is_resolved = not group.is_resolved
+    group.save()
+    return redirect("/")
+
+
+def group_remove(request, group_id):
+    Group.objects.filter(id=group_id).delete()
+    Event.objects.filter(group_id=group_id).delete()
+    return redirect("/")
+
+
+@render_to("favorites_list.html")
+def favorites_list(request):
+    paginator = Paginator(
+        Group.request_filter(request).filter(is_favorited=True).order_by("-updated_at"),
+        settings.GROUPS_PER_PAGE
+    )
+    page = request.GET.get("page", 1)
+    try:
+        groups = paginator.page(page)
+    except PageNotAnInteger:
+        groups = paginator.page(1)
+    except EmptyPage:
+        groups = paginator.page(paginator.num_pages)
+
+    top_graph_start_date = datetime.datetime.now() - datetime.timedelta(days=50)
+
+    return {
+        "request": request,
+        "groups": groups,
+        "top_graph": __format_graph(Event.request_filter(request).filter(group__is_favorited=True), top_graph_start_date)
+    }
+
 
 @render_to("log_list.html")
 def log_list(request):

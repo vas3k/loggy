@@ -14,7 +14,7 @@
         {% for log in logs %}
             <a href="/log/{{ log.id }}/" class="log_list_item">
                 <div class="log_list_item__dot group_details__counter_level_{{ log.group.level }} group_details__counter_type_{{ log.type }}"></div>
-                <div class="log_list_item__header">
+                <div class="log_list_item__header {% if log.group.is_resolved %}log_list_item__header_type_resolved{% endif %}">
                     #{{ log.id }}
                     {{ log.group.type }}
                     <b>{{ log.group.exc_name }}</b>

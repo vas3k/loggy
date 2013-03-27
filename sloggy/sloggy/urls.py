@@ -7,6 +7,12 @@ from django.conf.urls import patterns, include, url
 urlpatterns = patterns('',
     url(r'^$', "logs.views.group_list", name="group_list"),
     url(r'^group/(?P<group_id>\d+)/', "logs.views.group_details", name="group_details"),
+    url(r'^group/star/(?P<group_id>\d+)/', "logs.views.group_star", name="group_star"),
+    url(r'^group/resolve/(?P<group_id>\d+)/', "logs.views.group_resolve", name="group_resolve"),
+    url(r'^group/remove/(?P<group_id>\d+)/', "logs.views.group_remove", name="group_remove"),
+
+    url(r'^favorites/$', "logs.views.favorites_list", name="favorites_list"),
+
     url(r'^list/', "logs.views.log_list", name="log_list"),
     url(r'^log/(?P<log_id>\d+)/', "logs.views.log_details", name="log_details"),
 

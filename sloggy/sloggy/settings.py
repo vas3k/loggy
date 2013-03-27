@@ -114,7 +114,7 @@ LOGGING = {
 GROUPS_PER_PAGE = 30
 LOGS_PER_PAGE = 30
 DB_PREFIX = ""  # don't forget to change in clients
-VERSION = "0.2"
+VERSION = "0.3"
 
 try:
     from local_settings import *

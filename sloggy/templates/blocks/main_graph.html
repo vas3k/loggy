@@ -19,7 +19,7 @@
                 colors: [ "#6a6a6a" ]
             }
         ).hoverColumn(function () {
-            this.flag = r.popup(this.x, this.y, this.values || "0", "left").insertBefore(this);
+            this.flag = r.popup(this.x, this.y, data_labels[this.axis] + ": " + (this.values || "0") + " шт.", "left").insertBefore(this);
         }, function () {
             this.flag.animate({opacity: 0}, 300, function () {this.remove();});
         });
