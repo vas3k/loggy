@@ -88,6 +88,11 @@ class PythonClient(object):
         })
 
         try:
+            kwargs.update({ "request": self.format_request(kwargs) })
+        except Exception, ex:
+            print "Error formatting request: %s" % ex
+
+        try:
             kwargs.update({ "server": self.format_server(kwargs) })
         except Exception, ex:
             print "Error formatting server name: %s" % ex

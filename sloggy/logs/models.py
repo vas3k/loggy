@@ -60,7 +60,7 @@ class Group(models.Model):
         get_project = request.GET.get("project")
         if get_project:
             conditions.update({ "project__name": get_project })
-        return Group.objects.select_related().filter(**conditions)
+        return Group.objects.select_related("project").filter(**conditions)
 
     class Meta:
         db_table = "%sgroups" % DB_PREFIX
@@ -88,7 +88,7 @@ class Event(models.Model):
         get_project = request.GET.get("project")
         if get_project:
             conditions.update({ "group__project__name": get_project })
-        return Event.objects.select_related().filter(**conditions)
+        return Event.objects.select_related("group").filter(**conditions)
 
     class Meta:
         db_table = "%sevents" % DB_PREFIX

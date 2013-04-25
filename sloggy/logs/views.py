@@ -42,7 +42,7 @@ def group_list(request):
 @render_to("group_show.html")
 def group_details(request, group_id):
     group = get_object_or_404(Group, pk=group_id)
-    logs = Event.objects.filter(group_id=group_id).order_by("-created_at")
+    logs = Event.objects.select_related("group").filter(group_id=group_id).order_by("-created_at")
     events_graph_start_date = datetime.datetime.now() - datetime.timedelta(days=20)
     return {
         "request": request,
