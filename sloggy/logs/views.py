@@ -14,7 +14,7 @@ def __format_graph(queryset, start_from):
     while date <= datetime.datetime.now():
         result[date.date()] = 0
         date += datetime.timedelta(days=1)
-    for item in queryset.order_by("created_at").filter(created_at__gte=start_from):
+    for item in queryset.only("created_at").order_by("created_at").filter(created_at__gte=start_from):
         result[item.created_at.date()] += 1
     return [[k.strftime("%d %b"), result[k]] for k in sorted(result)]
 
