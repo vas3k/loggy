@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 import datetime
+from django.db import connection
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import get_object_or_404, redirect
@@ -42,7 +43,7 @@ def group_list(request):
 @render_to("group_show.html")
 def group_details(request, group_id):
     group = get_object_or_404(Group, pk=group_id)
-    logs = Event.objects.select_related("group").filter(group_id=group_id).order_by("-created_at")
+    logs = Event.objects.select_related("group").filter(group_id=group_id).order_by("-created_at")[:100]
     events_graph_start_date = datetime.datetime.now() - datetime.timedelta(days=20)
     return {
         "request": request,
@@ -70,8 +71,10 @@ def group_resolve(request, group_id):
 
 
 def group_remove(request, group_id):
-    Group.objects.filter(id=group_id).delete()
-    Event.objects.filter(group_id=group_id).delete()
+    # TODO: remove Tracebacks and Requests
+    cursor = connection.cursor()
+    cursor.execute("delete from " + settings.DB_PREFIX + "events where group_id = %s", [group_id])
+    cursor.execute("delete from " + settings.DB_PREFIX + "groups where id = %s", [group_id])
     return redirect("/")
 
 
