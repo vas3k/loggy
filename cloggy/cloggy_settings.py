@@ -22,3 +22,8 @@ LOG_TYPES = (
     (LOG_TYPE_EXCEPTION, "exception"),
     (LOG_TYPE_MESSAGE, "message")
 )
+
+try:
+    from local_settings import *
+except ImportError:
+    pass
